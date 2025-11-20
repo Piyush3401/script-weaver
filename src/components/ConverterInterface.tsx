@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const ConverterInterface = () => {
   const [inputText, setInputText] = useState("");
@@ -67,26 +68,34 @@ const ConverterInterface = () => {
 
     setIsConverting(true);
     
-    // Temporary mock conversion - will be replaced with actual API call
-    // This simulates the backend conversion
-    setTimeout(() => {
-      // Basic mock transliteration (will be replaced with actual backend)
-      const mockConversion = inputText
-        .toLowerCase()
-        .replace(/hello/gi, "नमस्ते")
-        .replace(/namaste/gi, "नमस्ते")
-        .replace(/india/gi, "भारत")
-        .replace(/bharat/gi, "भारत")
-        .replace(/welcome/gi, "स्वागत")
-        .replace(/swagat/gi, "स्वागत")
-        .replace(/thank you/gi, "धन्यवाद")
-        .replace(/dhanyavad/gi, "धन्यवाद");
+    try {
+      console.log('Calling transliterate function with text:', inputText);
       
-      setOutputText(mockConversion || "Backend integration pending...");
+      const { data, error } = await supabase.functions.invoke('transliterate', {
+        body: { text: inputText }
+      });
+
+      if (error) {
+        console.error('Transliteration error:', error);
+        toast.error("Failed to convert text. Please try again.");
+        setIsConverting(false);
+        return;
+      }
+
+      console.log('Transliteration result:', data);
+      
+      if (data?.transliteratedText) {
+        setOutputText(data.transliteratedText);
+        toast.success("Text converted successfully!");
+      } else {
+        toast.error("No translation received");
+      }
+    } catch (err) {
+      console.error('Conversion error:', err);
+      toast.error("An error occurred during conversion");
+    } finally {
       setIsConverting(false);
-      
-      toast.success("Text converted successfully!");
-    }, 500);
+    }
   };
 
   // Real-time conversion as user types
@@ -143,7 +152,7 @@ const ConverterInterface = () => {
             <Textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Type English text here... (e.g., 'namaste', 'bharat', 'swagat')"
+              placeholder="Type English or Hinglish text here... (e.g., 'namaste', 'kaise ho', 'acha', 'pyaar')"
               className="min-h-[300px] resize-none border-0 bg-transparent text-base focus-visible:ring-0"
             />
           </div>
@@ -196,21 +205,21 @@ const ConverterInterface = () => {
       {/* Info Cards */}
       <div className="mt-8 grid gap-4 md:grid-cols-3">
         <Card className="p-6 shadow-card">
-          <h3 className="mb-2 font-semibold text-primary">Real-time Conversion</h3>
+          <h3 className="mb-2 font-semibold text-primary">English & Hinglish</h3>
           <p className="text-sm text-muted-foreground">
-            Text converts automatically as you type
+            Supports both proper English and Hinglish text
           </p>
         </Card>
         <Card className="p-6 shadow-card">
-          <h3 className="mb-2 font-semibold text-secondary">NLP Powered</h3>
+          <h3 className="mb-2 font-semibold text-secondary">Phonetic Mapping</h3>
           <p className="text-sm text-muted-foreground">
-            Using Indic NLP for accurate transliteration
+            Smart context-aware transliteration
           </p>
         </Card>
         <Card className="p-6 shadow-card">
-          <h3 className="mb-2 font-semibold text-accent">Phonetic Mapping</h3>
+          <h3 className="mb-2 font-semibold text-accent">Real-time Output</h3>
           <p className="text-sm text-muted-foreground">
-            Context-aware character transformation
+            Instant conversion as you type
           </p>
         </Card>
       </div>
