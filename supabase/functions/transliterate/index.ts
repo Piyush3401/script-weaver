@@ -5,85 +5,150 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Comprehensive transliteration mapping for English/Hinglish to Devanagari
-const transliterationMap: { [key: string]: string } = {
-  // Common Hinglish words and phrases (checked first for better context)
-  'namaste': 'नमस्ते', 'namaskar': 'नमस्कार', 'namaskara': 'नमस्कार',
-  'dhanyavaad': 'धन्यवाद', 'dhanyavad': 'धन्यवाद', 'shukriya': 'शुक्रिया',
-  'bharat': 'भारत', 'india': 'भारत', 'hindustan': 'हिंदुस्तान',
-  'swagat': 'स्वागत', 'welcome': 'स्वागत',
-  'kripya': 'कृपया', 'kripaya': 'कृपया', 'please': 'कृपया',
-  'haan': 'हाँ', 'yes': 'हाँ',
-  'nahi': 'नहीं', 'nahin': 'नहीं', 'nai': 'नहीं', 'no': 'नहीं',
-  'theek': 'ठीक', 'thik': 'ठीक', 'ok': 'ठीक', 'okay': 'ठीक',
-  'aapka': 'आपका', 'aapki': 'आपकी', 'aap': 'आप', 'you': 'आप',
-  'mera': 'मेरा', 'meri': 'मेरी', 'mai': 'मैं', 'main': 'मैं',
-  'kya': 'क्या', 'what': 'क्या',
-  'kaise': 'कैसे', 'kese': 'कैसे', 'how': 'कैसे',
-  'kahan': 'कहाँ', 'kaha': 'कहाँ', 'where': 'कहाँ',
-  'kab': 'कब', 'when': 'कब',
-  'kyun': 'क्यों', 'kyu': 'क्यों', 'kyon': 'क्यों', 'why': 'क्यों',
-  'kaun': 'कौन', 'kon': 'कौन', 'who': 'कौन',
-  'acha': 'अच्छा', 'achha': 'अच्छा', 'accha': 'अच्छा', 'good': 'अच्छा',
-  'bahut': 'बहुत', 'bohot': 'बहुत', 'bahot': 'बहुत', 'very': 'बहुत', 'much': 'बहुत',
-  'thoda': 'थोड़ा', 'thora': 'थोड़ा', 'little': 'थोड़ा',
-  'pyaar': 'प्यार', 'pyar': 'प्यार', 'prem': 'प्रेम', 'love': 'प्यार',
-  'dost': 'दोस्त', 'friend': 'दोस्त', 'mitra': 'मित्र',
-  'ghar': 'घर', 'home': 'घर',
-  'paani': 'पानी', 'pani': 'पानी', 'water': 'पानी',
-  'khana': 'खाना', 'khaana': 'खाना', 'food': 'खाना',
-  'samay': 'समय', 'samaya': 'समय', 'time': 'समय',
-  'kal': 'कल', 'yesterday': 'कल', 'tomorrow': 'कल',
-  'aaj': 'आज', 'today': 'आज',
-  'abhi': 'अभी', 'now': 'अभी',
-  'subah': 'सुबह', 'morning': 'सुबह',
-  'shaam': 'शाम', 'sham': 'शाम', 'evening': 'शाम',
-  'raat': 'रात', 'rat': 'रात', 'night': 'रात',
-  'din': 'दिन', 'day': 'दिन',
-  'mahina': 'महीना', 'mahine': 'महीने', 'month': 'महीना',
-  'saal': 'साल', 'sal': 'साल', 'year': 'साल',
-  'bhai': 'भाई', 'brother': 'भाई',
-  'behen': 'बहन', 'bahen': 'बहन', 'sister': 'बहन',
-  'maa': 'माँ', 'mother': 'माँ',
-  'papa': 'पापा', 'pita': 'पिता', 'father': 'पिता',
-  'beta': 'बेटा', 'son': 'बेटा',
-  'beti': 'बेटी', 'daughter': 'बेटी',
-  'ho': 'हो', 'are': 'हो',
-  'hai': 'है', 'hain': 'हैं', 'is': 'है',
-  'was': 'था', 'were': 'थे',
+// Comprehensive word-level dictionary (checked first)
+const wordDictionary: { [key: string]: string } = {
+  // Common greetings
+  'hello': 'हैलो', 'hi': 'हाय', 'hey': 'हे',
+  'namaste': 'नमस्ते', 'namaskar': 'नमस्कार',
+  'welcome': 'स्वागत', 'swagat': 'स्वागत',
   
-  // Vowels
-  'a': 'अ', 'aa': 'आ', 'aaa': 'आ',
-  'i': 'इ', 'ii': 'ई', 'ee': 'ई',
+  // Pronouns and common words
+  'i': 'मैं', 'me': 'मुझे', 'my': 'मेरा', 'mine': 'मेरा',
+  'you': 'तुम', 'your': 'तुम्हारा', 'yours': 'तुम्हारा',
+  'he': 'वह', 'she': 'वह', 'it': 'यह',
+  'we': 'हम', 'they': 'वे',
+  'this': 'यह', 'that': 'वह',
+  'is': 'है', 'am': 'हूँ', 'are': 'हो', 'was': 'था', 'were': 'थे',
+  
+  // Question words
+  'what': 'क्या', 'kya': 'क्या',
+  'where': 'कहाँ', 'kahan': 'कहाँ', 'kaha': 'कहाँ',
+  'when': 'कब', 'kab': 'कब',
+  'why': 'क्यों', 'kyon': 'क्यों', 'kyu': 'क्यों', 'kyun': 'क्यों',
+  'how': 'कैसे', 'kaise': 'कैसे', 'kese': 'कैसे',
+  'who': 'कौन', 'kaun': 'कौन', 'kon': 'कौन',
+  
+  // Common verbs
+  'do': 'करो', 'does': 'करता', 'did': 'किया',
+  'go': 'जाओ', 'come': 'आओ', 'aao': 'आओ',
+  'eat': 'खाओ', 'drink': 'पियो',
+  
+  // Common nouns
+  'name': 'नाम', 'naam': 'नाम',
+  'friend': 'दोस्त', 'dost': 'दोस्त',
+  'home': 'घर', 'ghar': 'घर',
+  'water': 'पानी', 'paani': 'पानी', 'pani': 'पानी',
+  'food': 'खाना', 'khana': 'खाना',
+  'time': 'समय', 'samay': 'समय',
+  'day': 'दिन', 'din': 'दिन',
+  'night': 'रात', 'raat': 'रात', 'rat': 'रात',
+  'morning': 'सुबह', 'subah': 'सुबह',
+  'evening': 'शाम', 'shaam': 'शाम', 'sham': 'शाम',
+  'month': 'महीना', 'mahina': 'महीना',
+  'year': 'साल', 'saal': 'साल', 'sal': 'साल',
+  
+  // Family
+  'mother': 'माँ', 'maa': 'माँ',
+  'father': 'पिता', 'papa': 'पापा', 'pita': 'पिता',
+  'brother': 'भाई', 'bhai': 'भाई',
+  'sister': 'बहन', 'behen': 'बहन', 'bahen': 'बहन',
+  'son': 'बेटा', 'beta': 'बेटा',
+  'daughter': 'बेटी', 'beti': 'बेटी',
+  
+  // Adjectives
+  'good': 'अच्छा', 'acha': 'अच्छा', 'achha': 'अच्छा', 'accha': 'अच्छा',
+  'bad': 'बुरा', 'bura': 'बुरा',
+  'big': 'बड़ा', 'bada': 'बड़ा', 'bara': 'बड़ा',
+  'small': 'छोटा', 'chota': 'छोटा', 'chhota': 'छोटा',
+  'new': 'नया', 'naya': 'नया',
+  'old': 'पुराना', 'purana': 'पुराना',
+  
+  // Common expressions
+  'yes': 'हाँ', 'haan': 'हाँ', 'han': 'हाँ',
+  'no': 'नहीं', 'nahi': 'नहीं', 'nahin': 'नहीं', 'nai': 'नहीं',
+  'ok': 'ठीक', 'okay': 'ठीक', 'theek': 'ठीक', 'thik': 'ठीक',
+  'please': 'कृपया', 'kripya': 'कृपया',
+  'thankyou': 'धन्यवाद', 'thanks': 'धन्यवाद', 'dhanyavad': 'धन्यवाद', 'dhanyavaad': 'धन्यवाद',
+  'sorry': 'माफ़ करो', 'maaf': 'माफ़',
+  'love': 'प्यार', 'pyar': 'प्यार', 'pyaar': 'प्यार',
+  
+  // Quantities
+  'very': 'बहुत', 'bahut': 'बहुत', 'bohot': 'बहुत',
+  'much': 'बहुत', 'many': 'बहुत',
+  'little': 'थोड़ा', 'thoda': 'थोड़ा', 'thora': 'थोड़ा',
+  'some': 'कुछ', 'kuch': 'कुछ',
+  'all': 'सब', 'sab': 'सब',
+  
+  // Time
+  'today': 'आज', 'aaj': 'आज',
+  'tomorrow': 'कल', 'kal': 'कल',
+  'yesterday': 'कल', 
+  'now': 'अभी', 'abhi': 'अभी',
+  
+  // Countries
+  'india': 'भारत', 'bharat': 'भारत',
+  'pakistan': 'पाकिस्तान',
+  'america': 'अमेरिका',
+  
+  // Pronouns (Hinglish)
+  'mera': 'मेरा', 'meri': 'मेरी', 'mere': 'मेरे',
+  'tera': 'तेरा', 'teri': 'तेरी', 'tere': 'तेरे',
+  'uska': 'उसका', 'uski': 'उसकी', 'uske': 'उसके',
+  'humara': 'हमारा', 'humari': 'हमारी',
+  'tumhara': 'तुम्हारा', 'tumhari': 'तुम्हारी',
+  'aap': 'आप', 'aapka': 'आपका', 'aapki': 'आपकी',
+  
+  // Verbs (Hinglish)
+  'hai': 'है', 'hain': 'हैं', 'hu': 'हूँ', 'hun': 'हूँ',
+  'ho': 'हो', 'tha': 'था', 'thi': 'थी', 'the': 'थे',
+  'kar': 'कर', 'karo': 'करो', 'karna': 'करना',
+  'ja': 'जा', 'jao': 'जाओ', 'jana': 'जाना',
+};
+
+// Vowel characters and their Devanagari equivalents
+const vowelMap: { [key: string]: string } = {
+  'a': 'अ', 'aa': 'आ', 'i': 'इ', 'ii': 'ई', 'ee': 'ई',
   'u': 'उ', 'uu': 'ऊ', 'oo': 'ऊ',
-  'e': 'ए', 'ai': 'ऐ', 
+  'e': 'ए', 'ai': 'ऐ', 'ay': 'ऐ',
   'o': 'ओ', 'au': 'औ', 'ow': 'औ',
-  
-  // Consonants with 'a'
-  'ka': 'क', 'kha': 'ख', 'ga': 'ग', 'gha': 'घ', 'nga': 'ङ',
-  'cha': 'च', 'chha': 'छ', 'ja': 'ज', 'jha': 'झ', 'nya': 'ञ',
-  'ta': 'ट', 'tha': 'ठ', 'da': 'ड', 'dha': 'ढ', 'na': 'ण',
-  'tta': 'त', 'ttha': 'थ', 'dda': 'द', 'ddha': 'ध', 'nna': 'न',
-  'pa': 'प', 'pha': 'फ', 'fa': 'फ', 'ba': 'ब', 'bha': 'भ', 'ma': 'म',
-  'ya': 'य', 'ra': 'र', 'la': 'ल', 'va': 'व', 'wa': 'व',
-  'sha': 'श', 'shha': 'ष', 'sa': 'स', 'ha': 'ह',
-  
-  // Single consonants (with halant)
-  'k': 'क्', 'kh': 'ख्', 'g': 'ग्', 'gh': 'घ्',
-  'ch': 'च्', 'chh': 'छ्', 'j': 'ज्', 'jh': 'झ्',
-  't': 'त्', 'th': 'थ्', 'd': 'द्', 'dh': 'ध्',
-  'p': 'प्', 'ph': 'फ्', 'f': 'फ्', 'b': 'ब्', 'bh': 'भ्',
-  'm': 'म्', 'y': 'य्', 'r': 'र्', 'l': 'ल्',
-  'v': 'व्', 'w': 'व्', 'sh': 'श्', 's': 'स्', 'h': 'ह्',
-  'n': 'न्',
+  'ri': 'ऋ', 'ru': 'रु',
+};
+
+// Vowel matras (when following consonants)
+const matraMap: { [key: string]: string } = {
+  'aa': 'ा', 'i': 'ि', 'ii': 'ी', 'ee': 'ी',
+  'u': 'ु', 'uu': 'ू', 'oo': 'ू',
+  'e': 'े', 'ai': 'ै', 'ay': 'ै',
+  'o': 'ो', 'au': 'ौ', 'ow': 'ौ',
+  'ri': 'ृ',
+};
+
+// Consonant mappings
+const consonantMap: { [key: string]: string } = {
+  // Velars
+  'k': 'क', 'kh': 'ख', 'g': 'ग', 'gh': 'घ', 'ng': 'ङ',
+  // Palatals
+  'ch': 'च', 'chh': 'छ', 'j': 'ज', 'jh': 'झ', 'ny': 'ञ',
+  // Retroflexes
+  'tt': 'ट', 'tth': 'ठ', 'dd': 'ड', 'ddh': 'ढ', 'nn': 'ण',
+  // Dentals
+  't': 'त', 'th': 'थ', 'd': 'द', 'dh': 'ध', 'n': 'न',
+  // Labials
+  'p': 'प', 'ph': 'फ', 'f': 'फ', 'b': 'ब', 'bh': 'भ', 'm': 'म',
+  // Semi-vowels
+  'y': 'य', 'r': 'र', 'l': 'ल', 'v': 'व', 'w': 'व',
+  // Sibilants
+  'sh': 'श', 'shh': 'ष', 's': 'स', 'z': 'ज़',
+  // Aspirate
+  'h': 'ह',
 };
 
 function transliterateWord(word: string): string {
   const lowerWord = word.toLowerCase();
   
-  // Check if entire word is in the map
-  if (transliterationMap[lowerWord]) {
-    return transliterationMap[lowerWord];
+  // First check if entire word is in dictionary
+  if (wordDictionary[lowerWord]) {
+    return wordDictionary[lowerWord];
   }
   
   let result = '';
@@ -92,22 +157,72 @@ function transliterateWord(word: string): string {
   while (i < lowerWord.length) {
     let matched = false;
     
-    // Try to match longest possible sequence (5, 4, 3, 2, 1 characters)
-    for (let len = 5; len >= 1; len--) {
-      const substring = lowerWord.substring(i, i + len);
+    // Try to match consonant clusters (longer patterns first)
+    for (let len = 4; len >= 2; len--) {
+      const substr = lowerWord.substring(i, i + len);
       
-      if (transliterationMap[substring]) {
-        result += transliterationMap[substring];
+      // Check for consonant + vowel combinations
+      if (len >= 2) {
+        for (let cLen = len - 1; cLen >= 1; cLen--) {
+          const consonantPart = substr.substring(0, cLen);
+          const vowelPart = substr.substring(cLen);
+          
+          if (consonantMap[consonantPart] && (matraMap[vowelPart] || vowelPart === 'a')) {
+            result += consonantMap[consonantPart];
+            if (vowelPart !== 'a' && matraMap[vowelPart]) {
+              result += matraMap[vowelPart];
+            }
+            i += len;
+            matched = true;
+            break;
+          }
+        }
+      }
+      
+      if (matched) break;
+      
+      // Check for pure consonant
+      if (consonantMap[substr]) {
+        result += consonantMap[substr] + '्'; // Add halant
+        i += len;
+        matched = true;
+        break;
+      }
+      
+      // Check for pure vowel
+      if (vowelMap[substr]) {
+        result += vowelMap[substr];
         i += len;
         matched = true;
         break;
       }
     }
     
-    // If no match found, keep the character as is
+    // Single character fallback
     if (!matched) {
-      result += lowerWord[i];
-      i++;
+      const char = lowerWord[i];
+      
+      if (consonantMap[char]) {
+        // Check if next character is a vowel
+        const nextChar = lowerWord[i + 1];
+        if (nextChar && (matraMap[nextChar] || nextChar === 'a')) {
+          result += consonantMap[char];
+          if (nextChar !== 'a' && matraMap[nextChar]) {
+            result += matraMap[nextChar];
+          }
+          i += 2;
+        } else {
+          result += consonantMap[char] + '्';
+          i++;
+        }
+      } else if (vowelMap[char]) {
+        result += vowelMap[char];
+        i++;
+      } else {
+        // Keep unknown characters as-is
+        result += char;
+        i++;
+      }
     }
   }
   
@@ -120,15 +235,15 @@ function transliterateText(text: string): string {
   }
   
   // Split into words while preserving punctuation and spaces
-  const words = text.split(/(\s+|[.,!?;:])/);
+  const tokens = text.split(/(\s+|[.,!?;:'"(){}[\]])/);
   
-  return words.map(word => {
+  return tokens.map(token => {
     // Preserve whitespace and punctuation
-    if (/^\s+$/.test(word) || /^[.,!?;:]$/.test(word)) {
-      return word;
+    if (/^\s+$/.test(token) || /^[.,!?;:'"(){}[\]]$/.test(token)) {
+      return token;
     }
     
-    return transliterateWord(word);
+    return transliterateWord(token);
   }).join('');
 }
 
